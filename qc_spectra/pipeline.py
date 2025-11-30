@@ -29,8 +29,11 @@ name = out_file.stem
 print(f"Processing: {name}")
 
 
-freqs, ints = self.parser.parse(out_file)
-grid, spectrum = self.broadener.broaden(freqs, ints)
+print(f"Processing: {name}")
+
+
+x, y = self.parser.parse(out_file)
+grid, spectrum = self.broadener.broaden(x, y)
 
 
 if self.plotter:
