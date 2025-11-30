@@ -1,32 +1,35 @@
 import re
 
-def parse_orca_ir(path):
-    freqs = []
-    intensities = []
+class Parser:
+    def __init__(self):
+        self.ir_pattern = re.compile(
+            r"\s*\d+:\s*([0-9.]+)\s+[0-9.Ee+-]+\s+([0-9.]+)"
+        )
 
-    in_ir_section = False
-    pattern = re.compile(r"\s*\d+:\s*([0-9.]+)\s+[0-9.Ee+-]+\s+([0-9.]+)")
+    def parse_ir(self, path):
+        freqs = []
+        intensities = []
+        in_ir_section = False
 
-    with open(path, "r") as f:
-        for line in f:
-            # Enter IR SPECTRUM section
-            if "IR SPECTRUM" in line:
-                in_ir_section = True
-                continue
+        with open(path, "r") as f:
+            for line in f:
 
-            # Leave IR section if it ends
-            if in_ir_section and line.strip().startswith("----"):
-                continue 
-            if in_ir_section and line.strip() == "":
-                break  
+                # Start IR section
+                if "IR SPECTRUM" in line:
+                    in_ir_section = True
+                    continue
 
-            # Extract values only if inside IR block
-            if in_ir_section:
-                m = pattern.search(line)
-                if m:
-                    freq = float(m.group(1))
-                    inten = float(m.group(2))
-                    freqs.append(freq)
-                    intensities.append(inten)
+                # Exit IR section
+                if in_ir_section and line.strip() == "":
+                    break
+                if in_ir_section and line.strip().startswith("----"):
+                    continue
 
-    return freqs, intensities
+                # Extract values
+                if in_ir_section:
+                    m = self.ir_pattern.search(line)
+                    if m:
+                        freqs.append(float(m.group(1)))
+                        intensities.append(float(m.group(2)))
+
+        return freqs, intensities
